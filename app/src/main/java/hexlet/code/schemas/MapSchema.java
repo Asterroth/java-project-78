@@ -1,32 +1,41 @@
 package hexlet.code.schemas;
 
 import java.util.Map;
+import java.util.function.Predicate;
 
-public final class MapSchema extends BaseSchema {
+import static java.util.Objects.isNull;
+
+public final class MapSchema extends BaseSchema<Map> {
     public MapSchema() {
         super();
     }
 
     public MapSchema required() {
-        addCheck("required", value -> value instanceof Map);
+        addCheck("required", value -> !isNull(value));
         return this;
     }
 
-    public MapSchema sizeof(int number) {
-        addCheck("sizeof", value -> {
-            if (value instanceof Map) {
-                return ((Map) value).size() == number;
+    public MapSchema sizeof(int size) {
+        addCheck("sizeof", value -> size == value.size());
+        return this;
+    }
+
+    public void shape(Map<String, BaseSchema<String>> map) {
+        addCheck("shape", shapeCheck(map));
+    }
+
+    public Predicate<Map> shapeCheck(Map<String, BaseSchema<String>> inputSchema) {
+        return map -> {
+            for (Map.Entry<String, BaseSchema<String>> entry: inputSchema.entrySet()) {
+                String key = entry.getKey();
+                Map name = (Map) map;
+                var data = name.get(key);
+                var schema = inputSchema.get(key);
+                if (!schema.isValid((String) data)) {
+                    return false;
+                }
             }
             return true;
-        });
-        return this;
-    }
-
-    public MapSchema shape(Map<String, BaseSchema> schemas) {
-        addCheck("shape", value -> schemas.entrySet().stream().allMatch(e -> {
-            Object v = ((Map) value).get(e.getKey());
-            return e.getValue().isValid(v);
-        }));
-        return this;
+        };
     }
 }
