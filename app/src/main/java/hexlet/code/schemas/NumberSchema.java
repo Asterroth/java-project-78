@@ -17,7 +17,7 @@ public final class NumberSchema extends BaseSchema<Integer> {
             if (value == null) {
                 return true;
             } else {
-                return min <= value && value <= max;
+                return min <= (Integer) value && (Integer) value <= max;
             }
         });
         return this;
@@ -28,7 +28,7 @@ public final class NumberSchema extends BaseSchema<Integer> {
             if (value == null) {
                 return true;
             } else {
-                return value > 0;
+                return (Integer) value > 0;
             }
         });
         return this;

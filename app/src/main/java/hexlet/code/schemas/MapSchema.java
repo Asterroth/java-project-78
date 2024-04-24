@@ -5,9 +5,10 @@ import java.util.function.Predicate;
 
 import static java.util.Objects.isNull;
 
-public final class MapSchema extends BaseSchema<Map> {
+public final class MapSchema extends BaseSchema {
     public MapSchema() {
-        super();
+        //super();
+        addCheck("required", obj -> obj == null || obj instanceof Map<?, ?>);
     }
 
     public MapSchema required() {
@@ -16,26 +17,35 @@ public final class MapSchema extends BaseSchema<Map> {
     }
 
     public MapSchema sizeof(int size) {
-        addCheck("sizeof", value -> size == value.size());
+        addCheck("sizeof", value -> size == ((Map<?, ?>) value).size());
         return this;
     }
 
-    public void shape(Map<String, BaseSchema<String>> map) {
-        addCheck("shape", shapeCheck(map));
-    }
+//    public <T> MapSchema shape(Map<String, BaseSchema<T>> map) {
+//        addCheck("shape", shapeCheck(map));
+//    }
 
-    public Predicate<Map> shapeCheck(Map<String, BaseSchema<String>> inputSchema) {
-        return map -> {
-            for (Map.Entry<String, BaseSchema<String>> entry: inputSchema.entrySet()) {
-                String key = entry.getKey();
-                Map name = (Map) map;
-                var data = name.get(key);
-                var schema = inputSchema.get(key);
-                if (!schema.isValid((String) data)) {
-                    return false;
-                }
-            }
-            return true;
-        };
+    public MapSchema shape(Map<String, BaseSchema<String>> inputSchema) {
+        addCheck("shape", map ->
+                    inputSchema.entrySet().stream().allMatch(e -> {
+                        var data = ((Map<?, ?>) map).get(e.getKey());
+                        //var schema = e.getValue();
+                        return e.getValue().isValid((String) data);
+
+                    }));
+
+//            for (Map.Entry<String, BaseSchema<T>> entry: inputSchema.entrySet()) {
+//                String key = entry.getKey();
+//                Map name = (Map) map;
+//                var data = name.get(key);
+//                var schema = inputSchema.get(key);
+//                return schema.isValid((T) data);
+//                if (!schema.isValid((String) data)) {
+//                    return false;
+//                }
+//            }
+//            return true;
+//        };
+        return this;
     }
 }
