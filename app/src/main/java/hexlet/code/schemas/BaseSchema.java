@@ -1,14 +1,14 @@
 package hexlet.code.schemas;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
 public abstract class BaseSchema<T> {
-    private final Map<String, Predicate<T>> checks;
+    private final Map<String, Predicate> checks;
 
     protected BaseSchema() {
-        this.checks = new HashMap<>();
+        this.checks = new LinkedHashMap<>();
     }
 
     protected final void addCheck(String name, Predicate check) {
